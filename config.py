@@ -17,5 +17,7 @@ class Config:
             self.instance.critic_lr = None
 
             self.instance.buffer_size = None
+            self.instance.batch_size = None
+            self.instance.gamma = None
 
         return self.instance
