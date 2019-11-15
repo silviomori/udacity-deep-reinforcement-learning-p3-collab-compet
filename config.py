@@ -9,6 +9,7 @@ class Config:
 
             self.instance.state_size = None
             self.instance.action_size = None
+            self.instance.num_agents = None
 
             self.instance.actor_layers = None
             self.instance.critic_layers = None
