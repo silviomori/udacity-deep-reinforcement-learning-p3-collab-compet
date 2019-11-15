@@ -16,4 +16,6 @@ class Config:
             self.instance.actor_lr = None
             self.instance.critic_lr = None
 
+            self.instance.buffer_size = None
+
         return self.instance
