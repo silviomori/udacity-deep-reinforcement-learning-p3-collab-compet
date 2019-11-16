@@ -31,6 +31,22 @@ class MultiAgentDDPG():
                 actions[:,idx] = agent.actor_target(states[:,idx])
         return actions
 
+    def actions_local(self, states, agent_id):
+        batch_size = self.config.batch_size
+        num_agents = self.config.num_agents
+        action_size = self.config.action_size
+
+        actions = torch.empty(
+            (batch_size, num_agents, action_size),
+            device=self.config.device)
+        for idx, agent in enumerate(self.agents):
+            action = agent.actor_target(states[:,idx])
+            if not idx == agent_id:
+                action.detach()
+            actions[:,idx] = action
+
+        return actions
+
     def store(self, state, actions, rewards, next_state):
         self.buffer.store(state, actions, rewards, next_state)
 
@@ -57,3 +73,13 @@ class MultiAgentDDPG():
             loss = F.mse_loss(q_value_predicted, y)
             loss.backward()
             agent.critic_optimizer.step()
+
+            ## Train the Actor network
+            actions_local = self.actions_local(states, agent_id)
+            actions_local = actions_local.view(batch_size, -1)
+            q_value_predicted = agent.critic_local(obs, actions)
+
+            agent.actor_optimizer.zero_grad()
+            loss = -q_value_predicted.mean()
+            loss.backward()
+            agent.actor_optimizer.step()
