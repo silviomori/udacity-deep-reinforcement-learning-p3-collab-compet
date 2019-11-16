@@ -83,3 +83,5 @@ class MultiAgentDDPG():
             loss = -q_value_predicted.mean()
             loss.backward()
             agent.actor_optimizer.step()
+
+            agent.soft_update()

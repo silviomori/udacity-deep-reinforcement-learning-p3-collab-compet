@@ -6,6 +6,9 @@ class Config:
 
             self.instance.device = None
             self.instance.seed = None
+            self.instance.target_score = None
+            self.instance.target_episodes = None
+            self.instance.max_episodes = None
 
             self.instance.state_size = None
             self.instance.action_size = None
@@ -19,5 +22,6 @@ class Config:
             self.instance.buffer_size = None
             self.instance.batch_size = None
             self.instance.gamma = None
+            self.instance.tau = None
 
         return self.instance

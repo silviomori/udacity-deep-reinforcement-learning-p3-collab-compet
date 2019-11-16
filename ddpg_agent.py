@@ -36,6 +36,7 @@ class Agent():
         """Soft update actor and critic parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
         """
+        tau = self.config.tau
         for target_param, local_param \
                 in zip(self.actor_target.parameters(),
                        self.actor_local.parameters()):
