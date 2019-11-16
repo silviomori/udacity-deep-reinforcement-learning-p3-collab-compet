@@ -24,4 +24,8 @@ class Config:
             self.instance.gamma = None
             self.instance.tau = None
 
+            self.instance.noise = None
+            self.instance.noise_theta = None
+            self.instance.noise_sigma = None
+
         return self.instance

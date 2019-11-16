@@ -1,6 +1,7 @@
 import copy
 import random
 
+import numpy as np
 import torch
 import torch.optim as optim
 
@@ -32,6 +33,9 @@ class Agent():
             self.critic_local.parameters(),
             lr=self.config.critic_lr)
 
+        # Initialize a noise process
+        self.noise = OUNoise()
+
     def soft_update(self):
         """Soft update actor and critic parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
@@ -58,4 +62,35 @@ class Agent():
             state.to(self.config.device)
             action = self.actor_local(state).data.cpu().numpy()
             self.actor_local.train()
+
+        if self.config.noise:
+            action += self.noise.sample()
+            np.clip(action, a_min=-1, a_max=1, out=action)
+
         return action
+
+    def reset_noise(self):
+        self.noise.reset()
+
+
+class OUNoise:
+    """Ornstein-Uhlenbeck process."""
+    def __init__(self, mu=0.):
+        """Initialize parameters and noise process."""
+        self.config = Config()
+        random.seed(self.config.seed)
+        self.mu = mu * np.ones(self.config.action_size)
+        self.reset()
+
+    def reset(self):
+        """Reset the internal state (= noise) to mean (mu)."""
+        self.state = copy.copy(self.mu)
+
+    def sample(self):
+        """Update internal state and return it as a noise sample."""
+        x = self.state
+        random_array = [random.random() for i in range(len(x))]
+        dx = self.config.noise_theta * (self.mu - x) \
+             + self.config.noise_sigma * np.array(random_array)
+        self.state = x + dx
+        return self.state

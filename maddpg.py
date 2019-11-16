@@ -85,3 +85,7 @@ class MultiAgentDDPG():
             agent.actor_optimizer.step()
 
             agent.soft_update()
+
+    def reset_noise(self):
+        for agent in self.agents:
+            agent.reset_noise()
