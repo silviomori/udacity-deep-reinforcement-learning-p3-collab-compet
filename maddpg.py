@@ -40,7 +40,7 @@ class MultiAgentDDPG():
             (batch_size, num_agents, action_size),
             device=self.config.device)
         for idx, agent in enumerate(self.agents):
-            action = agent.actor_target(states[:,idx])
+            action = agent.actor_local(states[:,idx])
             if not idx == agent_id:
                 action.detach()
             actions[:,idx] = action
@@ -77,7 +77,7 @@ class MultiAgentDDPG():
             ## Train the Actor network
             actions_local = self.actions_local(states, agent_id)
             actions_local = actions_local.view(batch_size, -1)
-            q_value_predicted = agent.critic_local(obs, actions)
+            q_value_predicted = agent.critic_local(obs, actions_local)
 
             agent.actor_optimizer.zero_grad()
             loss = -q_value_predicted.mean()
