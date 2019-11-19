@@ -18,6 +18,7 @@ class Config:
             self.instance.critic_layers = None
             self.instance.actor_lr = None
             self.instance.critic_lr = None
+            self.instance.batch_normalization = None
 
             self.instance.buffer_size = None
             self.instance.batch_size = None

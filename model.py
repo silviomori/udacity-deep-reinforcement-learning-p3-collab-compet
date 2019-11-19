@@ -54,6 +54,8 @@ class Critic(BaseNN):
         super(Critic, self).__init__()
         for nodes_in, nodes_out in self.layers_nodes():
             self.create_fc_layer(nodes_in, nodes_out)
+        if self.config.batch_normalization:
+            self.bn = nn.BatchNorm1d(self.module_list[1].in_features)
 
     def layers_nodes(self):
         nodes = []
@@ -68,6 +70,8 @@ class Critic(BaseNN):
     def forward(self, state, action):
         x = F.relu(self.module_list[0](state))
         x = torch.cat((x, action), dim=1)
+        if self.config.batch_normalization:
+            x = self.bn(x)
         for layer in self.module_list[1:-1]:
             x = F.relu(layer(x))
         x = self.module_list[-1](x)
