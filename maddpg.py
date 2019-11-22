@@ -58,14 +58,15 @@ class MultiAgentDDPG():
         for agent_id, agent in enumerate(self.agents):
             states, actions, rewards, next_states = self.buffer.sample()
             obs = states[:,agent_id] # observations for this agent
+            next_obs = next_states[:,agent_id] # next obs for this agent
             r = rewards[:,agent_id].unsqueeze_(1)
 
             ## Train the Critic network
             with torch.no_grad():
                 next_actions = self.actions_target(next_states)
                 next_actions = next_actions.view(batch_size, -1)
-                next_q_values = agent.critic_target(obs, next_actions)
-                y = r + self.config.gamma * next_q_values
+                next_q_val = agent.critic_target(next_obs, next_actions)
+                y = r + self.config.gamma * next_q_val
             actions = actions.view(batch_size, -1)
             q_value_predicted = agent.critic_local(obs, actions)
 
