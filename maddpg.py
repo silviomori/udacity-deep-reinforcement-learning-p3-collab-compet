@@ -44,7 +44,6 @@ class MultiAgentDDPG():
             if not idx == agent_id:
                 action.detach()
             actions[:,idx] = action
-
         return actions
 
     def store(self, state, actions, rewards, next_state):
@@ -56,9 +55,13 @@ class MultiAgentDDPG():
     def learn(self):
         batch_size = self.config.batch_size
         for agent_id, agent in enumerate(self.agents):
+            # sample a batch of experiences
             states, actions, rewards, next_states = self.buffer.sample()
-            obs = states[:,agent_id] # observations for this agent
-            next_obs = next_states[:,agent_id] # next obs for this agent
+            # stack the agents' variables to feed the networks
+            obs = states.view(batch_size, -1)
+            actions = actions.view(batch_size, -1)
+            next_obs = next_states.view(batch_size, -1)
+            # Consider only the rewards for this agent
             r = rewards[:,agent_id].unsqueeze_(1)
 
             ## Train the Critic network
@@ -67,25 +70,22 @@ class MultiAgentDDPG():
                 next_actions = next_actions.view(batch_size, -1)
                 next_q_val = agent.critic_target(next_obs, next_actions)
                 y = r + self.config.gamma * next_q_val
-            actions = actions.view(batch_size, -1)
-            q_value_predicted = agent.critic_local(obs, actions)
-
             agent.critic_optimizer.zero_grad()
+            q_value_predicted = agent.critic_local(obs, actions)
             loss = F.mse_loss(q_value_predicted, y)
             loss.backward()
             agent.critic_optimizer.step()
 
             ## Train the Actor network
+            agent.actor_optimizer.zero_grad()
             actions_local = self.actions_local(states, agent_id)
             actions_local = actions_local.view(batch_size, -1)
             q_value_predicted = agent.critic_local(obs, actions_local)
-
-            agent.actor_optimizer.zero_grad()
             loss = -q_value_predicted.mean()
             loss.backward()
             agent.actor_optimizer.step()
 
-        for agent_id, agent in enumerate(self.agents):
+        for agent in self.agents:
             agent.soft_update()
 
     def reset_noise(self):

@@ -59,7 +59,7 @@ class Critic(BaseNN):
 
     def layers_nodes(self):
         nodes = []
-        nodes.append(self.config.state_size)
+        nodes.append(self.config.state_size * self.config.num_agents)
         nodes.extend(self.config.critic_layers)
         nodes.append(1)
         nodes_in = nodes[:-1]
@@ -75,4 +75,4 @@ class Critic(BaseNN):
         for layer in self.module_list[1:-1]:
             x = F.relu(layer(x))
         x = self.module_list[-1](x)
-        return x
+        return torch.sigmoid(x)
