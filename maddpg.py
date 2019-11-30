@@ -94,3 +94,7 @@ class MultiAgentDDPG():
 
     def state_dict(self):
         return [agent.actor_local.state_dict() for agent in self.agents]
+
+    def lr_step(self):
+        for agent in self.agents:
+            agent.lr_step()

@@ -23,6 +23,10 @@ class Agent():
         self.actor_optimizer = optim.Adam(
             self.actor_local.parameters(),
             lr=self.config.actor_lr)
+        self.actor_lr_scheduler = optim.lr_scheduler.StepLR(
+            self.actor_optimizer,
+            step_size=self.config.lr_sched_step,
+            gamma=self.config.lr_sched_gamma)
 
         # Critic Network
         self.critic_local = Critic()
@@ -32,6 +36,10 @@ class Agent():
         self.critic_optimizer = optim.Adam(
             self.critic_local.parameters(),
             lr=self.config.critic_lr)
+        self.critic_lr_scheduler = optim.lr_scheduler.StepLR(
+            self.critic_optimizer,
+            step_size=self.config.lr_sched_step,
+            gamma=self.config.lr_sched_gamma)
 
         # Initialize a noise process
         self.noise = OUNoise()
@@ -68,6 +76,10 @@ class Agent():
             np.clip(action, a_min=-1, a_max=1, out=action)
 
         return action
+
+    def lr_step(self):
+        self.actor_lr_scheduler.step()
+        self.critic_lr_scheduler.step()
 
     def reset_noise(self):
         self.noise.reset()
