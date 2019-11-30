@@ -91,3 +91,6 @@ class MultiAgentDDPG():
     def reset_noise(self):
         for agent in self.agents:
             agent.reset_noise()
+
+    def state_dict(self):
+        return [agent.actor_local.state_dict() for agent in self.agents]
